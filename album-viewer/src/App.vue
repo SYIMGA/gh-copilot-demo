@@ -6,6 +6,26 @@
     </header>
 
     <main class="main">
+      <section class="validator-card">
+        <h2>GUID validator</h2>
+        <label for="guid-input">Enter a GUID</label>
+        <input
+          id="guid-input"
+          v-model="guidInput"
+          type="text"
+          placeholder="123e4567-e89b-42d3-a456-426614174000"
+        />
+        <p :class="{ valid: isValidGuid, invalid: guidInput && !isValidGuid }">
+          {{
+            guidInput
+              ? isValidGuid
+                ? 'Valid GUID format'
+                : 'Invalid GUID format'
+              : 'Enter a GUID to validate'
+          }}
+        </p>
+      </section>
+
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
         <p>Loading albums...</p>
@@ -28,14 +48,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import AlbumCard from './components/AlbumCard.vue'
 import type { Album } from './types/album'
+import { validateGuid } from './utils/guid'
 
 const albums = ref<Album[]>([])
 const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
+const guidInput = ref('')
+const isValidGuid = computed(() => validateGuid(guidInput.value))
 
 const fetchAlbums = async (): Promise<void> => {
   try {
@@ -106,6 +129,56 @@ onMounted(() => {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.validator-card {
+  max-width: 520px;
+  margin: 0 auto 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.validator-card h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.validator-card label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.validator-card input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 1rem;
+}
+
+.validator-card input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.validator-card p {
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.validator-card p.valid {
+  color: #7ef3b5;
+}
+
+.validator-card p.invalid {
+  color: #ff9ca1;
 }
 
 .error {

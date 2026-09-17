@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: album-api
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: album-api
+  template:
+    metadata:
+      labels:
+        app: album-api
+    spec:
+      containers:
+        - name: album-api
+          image: ${DOCKERHUB_USERNAME}/album-api:${GITHUB_RUN_ID}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: album-api
+  namespace: dev
+spec:
+  selector:
+    app: album-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
